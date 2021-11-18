@@ -1,4 +1,4 @@
-package ch.heigvd.api.mailrobot.prank;
+package ch.heigvd.api.mailprank.prank;
 
 public class PrankGenerator {
 }

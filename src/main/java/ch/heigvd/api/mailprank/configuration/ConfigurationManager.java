@@ -1,4 +1,4 @@
-package ch.heigvd.api.mailrobot.configuration;
+package ch.heigvd.api.mailprank.configuration;
 
-public class ConfigurationManager {
+public class ConfigurationManager implements IConfigurationManager {
 }

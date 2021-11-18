@@ -1,4 +1,4 @@
-package ch.heigvd.api.mailrobot.smtp;
+package ch.heigvd.api.mailprank.smtp;
 
-public class SMTPClient {
+public class SMTPClient implements ISMTPClient{
 }

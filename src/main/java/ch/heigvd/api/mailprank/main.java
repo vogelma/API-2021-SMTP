@@ -1,4 +1,4 @@
-package ch.heigvd.api.mailrobot;
+package ch.heigvd.api.mailprank;
 
 public class main {
 }
