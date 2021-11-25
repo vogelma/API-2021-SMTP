@@ -5,7 +5,6 @@ import ch.heigvd.api.mailprank.mail.Mail;
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.logging.Logger;
 
 /**
  * @author Maëlle et Mélissa
@@ -13,7 +12,7 @@ import java.util.logging.Logger;
 public class SMTPClient {
 
     private final String serverAddress;
-    private int serverPort;
+    private final int serverPort;
 
     /**
      *
@@ -28,7 +27,7 @@ public class SMTPClient {
     /**
      *
      * @param mail mail which contains sender, receiver and body
-     * @throws IOException
+     * @throws IOException writer and reader can throw some exception
      */
     public void sendMail(Mail mail) throws IOException {
         System.out.println("Sending message with SMTP");
@@ -100,7 +99,7 @@ public class SMTPClient {
      * @param param parameter to add
      * @param writer writer to send
      * @param reader reader to print
-     * @throws IOException
+     * @throws IOException writer and reader can throw some exception
      */
     private void sendSequence(String toSend, String param, PrintWriter writer, BufferedReader reader) throws IOException {
         writer.write(toSend);
