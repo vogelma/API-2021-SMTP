@@ -16,4 +16,16 @@ public class Group {
     public List<Person> getMembers() {
         return members;
     }
+
+    public String getSenderMail(){
+        return members.get(0).getMail();
+    }
+
+    public String[] getVictimsMail(){
+        String[] victimsMail = new String[members.size()-1];
+        for(int i = 1; i < members.size(); i++){
+            victimsMail[i-1] = members.get(i).getMail();
+        }
+        return victimsMail;
+    }
 }
