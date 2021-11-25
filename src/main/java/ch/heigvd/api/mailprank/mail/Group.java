@@ -12,4 +12,8 @@ public class Group {
             this.members.add(p.clone());
         }
     }
+
+    public List<Person> getMembers() {
+        return members;
+    }
 }
