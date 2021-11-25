@@ -10,10 +10,6 @@ public class Mail {
         return new String[]{"",""};
     }
 
-    public String[] getCc(){
-        return new String[]{"",""};
-    }
-
     public String getBody(){
         return "";
     }
