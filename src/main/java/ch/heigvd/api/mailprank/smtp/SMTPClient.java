@@ -7,38 +7,52 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.logging.Logger;
 
+/**
+ * @author Maëlle et Mélissa
+ */
 public class SMTPClient {
 
-    private static final Logger LOG = Logger.getLogger(SMTPClient.class.getName());
-
     private final String serverAddress;
-    private int serverPort = 25;
+    private int serverPort;
 
+    /**
+     *
+     * @param serverAddr smtp server address
+     * @param serverPort smtp server port
+     */
     public SMTPClient(String serverAddr, int serverPort){
         this.serverAddress = serverAddr;
         this.serverPort = serverPort;
     }
 
-    void sendMail(Mail mail) throws IOException {
-        LOG.info("Sending message with SMTP");
+    /**
+     *
+     * @param mail mail which contains sender, receiver and body
+     * @throws IOException
+     */
+    public void sendMail(Mail mail) throws IOException {
+        System.out.println("Sending message with SMTP");
         Socket socketServer = new Socket(serverAddress, serverPort);
         PrintWriter writer = new PrintWriter(new OutputStreamWriter(socketServer.getOutputStream(), StandardCharsets.UTF_8), true);
         BufferedReader reader = new BufferedReader(new InputStreamReader(socketServer.getInputStream(), StandardCharsets.UTF_8));
 
         String line = reader.readLine();
-        LOG.info(line);
+        System.out.println(line);
         //must be the domain
         writer.println("EHLO localhost\r\n");
 
         line = reader.readLine();
-        LOG.info(line);
+        System.out.println(line);
+
+        //check error
         if(!line.startsWith("250")){
             throw new IOException("SMTP error: " + line);
         }
 
+
         while(line.startsWith("250")){
             line = reader.readLine();
-            LOG.info(line);
+            System.out.println(line);
         }
 
         sendSequence("MAIL FROM:", mail.getFrom(), writer, reader);
@@ -51,7 +65,7 @@ public class SMTPClient {
         writer.flush();
 
         line = reader.readLine();
-        LOG.info(line);
+        System.out.println(line);
 
         writer.write("Content-Type: text/plain: charset=\"utf-8\"\r\n");
         writer.write("From: " + mail.getFrom() + "\r\n");
@@ -69,7 +83,7 @@ public class SMTPClient {
         writer.flush();
 
         line = reader.readLine();
-        LOG.info(line);
+        System.out.println(line);
 
         writer.write("QUIT\r\n");
         writer.flush();
@@ -80,6 +94,14 @@ public class SMTPClient {
 
     }
 
+    /**
+     *
+     * @param toSend line to send
+     * @param param parameter to add
+     * @param writer writer to send
+     * @param reader reader to print
+     * @throws IOException
+     */
     private void sendSequence(String toSend, String param, PrintWriter writer, BufferedReader reader) throws IOException {
         writer.write(toSend);
         writer.write(param);
