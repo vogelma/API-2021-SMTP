@@ -10,4 +10,9 @@ public class Person {
     public String getMail() {
         return mail;
     }
+
+    @Override
+    public Person clone(){
+        return new Person(mail);
+    }
 }
