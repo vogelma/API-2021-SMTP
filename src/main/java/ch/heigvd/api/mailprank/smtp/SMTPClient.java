@@ -4,77 +4,67 @@ import ch.heigvd.api.mailprank.mail.Mail;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.logging.Logger;
+import java.nio.charset.StandardCharsets;
 
-public class SMTPClient implements ISMTPClient{
+/**
+ * @author Maëlle et Mélissa
+ */
+public class SMTPClient {
 
-    private static final Logger LOG = Logger.getLogger(SMTPClient.class.getName());
+    private final String serverAddress;
+    private final int serverPort;
 
-    private String serverAddress;
-    private int serverPort = 25;
-
-    private PrintWriter writer;
-    private BufferedReader reader;
-
+    /**
+     *
+     * @param serverAddr smtp server address
+     * @param serverPort smtp server port
+     */
     public SMTPClient(String serverAddr, int serverPort){
         this.serverAddress = serverAddr;
         this.serverPort = serverPort;
     }
 
-    void sendMail(Mail mail) throws IOException {
-        LOG.info("Sending message with SMTP");
+    /**
+     *
+     * @param mail mail which contains sender, receiver and body
+     * @throws IOException writer and reader can throw some exception
+     */
+    public void sendMail(Mail mail) throws IOException {
+        System.out.println("Sending message with SMTP");
         Socket socketServer = new Socket(serverAddress, serverPort);
-        writer = new PrintWriter(new OutputStreamWriter(socketServer.getOutputStream(), "UTF-8"), true);
-        reader = new BufferedReader(new InputStreamReader(socketServer.getInputStream(), "UTF-8"));
+        PrintWriter writer = new PrintWriter(new OutputStreamWriter(socketServer.getOutputStream(), StandardCharsets.UTF_8), true);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(socketServer.getInputStream(), StandardCharsets.UTF_8));
 
         String line = reader.readLine();
-        LOG.info(line);
-        writer.println("EHLO melma\r\n");
+        System.out.println(line);
+        //must be the domain
+        writer.println("EHLO localhost\r\n");
 
         line = reader.readLine();
-        LOG.info(line);
+        System.out.println(line);
+
+        //check error
         if(!line.startsWith("250")){
             throw new IOException("SMTP error: " + line);
         }
 
+
         while(line.startsWith("250")){
             line = reader.readLine();
-            LOG.info(line);
+            System.out.println(line);
         }
 
-        writer.write("MAIL FROM:");
-        writer.write(mail.getFrom()); //to implement
-        writer.write("\r\n");
-        writer.flush();
-
-        line = reader.readLine();
-        LOG.info(line);
+        sendSequence("MAIL FROM:", mail.getFrom(), writer, reader);
 
         for(String receiver : mail.getTo()){
-            writer.write("RCPT TO:");
-            writer.write(receiver);
-            writer.write("\r\n");
-            writer.flush();
-
-            line = reader.readLine();
-            LOG.info(line);
-        }
-
-        for(String receiver : mail.getCc()){
-            writer.write("RCPT TO:");
-            writer.write(receiver);
-            writer.write("\r\n");
-            writer.flush();
-
-            line = reader.readLine();
-            LOG.info(line);
+            sendSequence("RCPT TO:", receiver, writer, reader);
         }
 
         writer.write("DATA\r\n");
         writer.flush();
 
         line = reader.readLine();
-        LOG.info(line);
+        System.out.println(line);
 
         writer.write("Content-Type: text/plain: charset=\"utf-8\"\r\n");
         writer.write("From: " + mail.getFrom() + "\r\n");
@@ -86,14 +76,13 @@ public class SMTPClient implements ISMTPClient{
         writer.write("\r\n");
         writer.flush();
 
-        LOG.info(mail.getBody());
         writer.write(mail.getBody());
         writer.write("\r\n");
         writer.write(".\r\n");
         writer.flush();
 
         line = reader.readLine();
-        LOG.info(line);
+        System.out.println(line);
 
         writer.write("QUIT\r\n");
         writer.flush();
@@ -104,8 +93,21 @@ public class SMTPClient implements ISMTPClient{
 
     }
 
-    //mettre write en pointeur?
-    private String sendSequence(String toSend){
-        return "";
+    /**
+     *
+     * @param toSend line to send
+     * @param param parameter to add
+     * @param writer writer to send
+     * @param reader reader to print
+     * @throws IOException writer and reader can throw some exception
+     */
+    private void sendSequence(String toSend, String param, PrintWriter writer, BufferedReader reader) throws IOException {
+        writer.write(toSend);
+        writer.write(param);
+        writer.write("\r\n");
+        writer.flush();
+
+        String line = reader.readLine();
+        System.out.println(line);
     }
 }
