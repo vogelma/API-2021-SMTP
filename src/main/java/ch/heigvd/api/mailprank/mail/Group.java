@@ -13,18 +13,14 @@ public class Group {
         }
     }
 
-    public List<Person> getMembers() {
-        return members;
+    public Person getSender(){
+        return members.get(0);
     }
 
-    public String getSenderMail(){
-        return members.get(0).getMail();
-    }
-
-    public String[] getVictimsMail(){
-        String[] victimsMail = new String[members.size()-1];
+    public Person[] getVictims(){
+        Person[] victimsMail = new Person[members.size()-1];
         for(int i = 1; i < members.size(); i++){
-            victimsMail[i-1] = members.get(i).getMail();
+            victimsMail[i-1] = members.get(i);
         }
         return victimsMail;
     }

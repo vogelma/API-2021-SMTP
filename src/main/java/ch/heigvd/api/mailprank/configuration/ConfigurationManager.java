@@ -46,7 +46,7 @@ public class ConfigurationManager {
           new BufferedReader(
               new InputStreamReader(
                   new FileInputStream("config/victims.utf8"), StandardCharsets.UTF_8));
-      String nextMail = "";
+      String nextMail;
       while ((nextMail = reader.readLine()) != null) {
         victimsList.add(new Person(nextMail));
       }
@@ -67,7 +67,7 @@ public class ConfigurationManager {
           new BufferedReader(
               new InputStreamReader(
                   new FileInputStream("config/content.utf8"), StandardCharsets.UTF_8));
-      Content currentReadContent = null;
+      Content currentReadContent;
       do {
         if ((currentReadContent = readSingleContent(reader)) != null) {
           contentList.add(currentReadContent);
@@ -80,7 +80,7 @@ public class ConfigurationManager {
   }
 
   private static Content readSingleContent(BufferedReader reader) {
-    String subject = "";
+    String subject;
     StringBuilder body = new StringBuilder();
     String line;
     try {

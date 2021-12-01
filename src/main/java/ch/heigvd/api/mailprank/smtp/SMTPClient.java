@@ -1,6 +1,7 @@
 package ch.heigvd.api.mailprank.smtp;
 
 import ch.heigvd.api.mailprank.mail.Mail;
+import ch.heigvd.api.mailprank.mail.Person;
 
 import java.io.*;
 import java.net.Socket;
@@ -54,10 +55,10 @@ public class SMTPClient {
             System.out.println(line);
         }
 
-        sendSequence("MAIL FROM:", mail.getFrom(), writer, reader);
+        sendSequence("MAIL FROM:", mail.getFrom().getMail(), writer, reader);
 
-        for(String receiver : mail.getTo()){
-            sendSequence("RCPT TO:", receiver, writer, reader);
+        for(Person receiver : mail.getTo()){
+            sendSequence("RCPT TO:", receiver.getMail(), writer, reader);
         }
 
         writer.write("DATA\r\n");
@@ -76,7 +77,7 @@ public class SMTPClient {
         writer.write("\r\n");
         writer.flush();
 
-        writer.write(mail.getBody());
+        writer.write(mail.getBody().getContent());
         writer.write("\r\n");
         writer.write(".\r\n");
         writer.flush();
