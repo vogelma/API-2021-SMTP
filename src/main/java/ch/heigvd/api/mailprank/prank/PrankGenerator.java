@@ -14,7 +14,7 @@ import java.util.Random;
  * @author Maëlle Vogel, Mélissa Gehring
  */
 public class PrankGenerator {
-  private static final String SERVER_ADDRESS = "smtp.heig-vd.ch";
+  private static final String SERVER_ADDRESS = "localhost";
   private static final int SERVER_PORT = 25;
 
   // Make PrankGenerator uninstanciable

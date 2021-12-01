@@ -46,25 +46,22 @@ public class SMTPClient {
     String line = reader.readLine();
     System.out.println(line);
     // Must be the domain
-    writer.println("EHLO localhost\r\n");
-
-    line = reader.readLine();
-    System.out.println(line);
+    writer.write("EHLO localhost\r\n");
+    writer.flush();
 
     // Check error
-    if (!line.startsWith("250")) {
-      throw new IOException("SMTP error: " + line);
-    }
-
-    while (line.startsWith("250")) {
+    for (int i = 0; i < 3; i++) {
       line = reader.readLine();
       System.out.println(line);
+      if (!line.startsWith("250")) {
+        throw new IOException("SMTP error: " + line);
+      }
     }
 
-    sendSequence("MAIL FROM:", mail.getFrom().getMail(), writer, reader);
+    sendSequence("MAIL FROM: ", mail.getFrom().getMail(), writer, reader);
 
     for (Person receiver : mail.getTo()) {
-      sendSequence("RCPT TO:", receiver.getMail(), writer, reader);
+      sendSequence("RCPT TO: ", receiver.getMail(), writer, reader);
     }
 
     writer.write("DATA\r\n");
@@ -74,18 +71,19 @@ public class SMTPClient {
     System.out.println(line);
 
     writer.write("Content-Type: text/plain: charset=\"utf-8\"\r\n");
-    writer.write("From: " + mail.getFrom() + "\r\n");
+    writer.write("From: " + mail.getFrom().getMail() + "\r\n");
 
-    writer.write("To: " + mail.getTo().get(0));
-    for (int i = 1; i < mail.getTo().size(); ++i) {
-      writer.write(", " + mail.getTo().get(i));
+    writer.write("To: ");
+    String prefix = "";
+    for (int i = 0; i < mail.getTo().size(); ++i) {
+      writer.write(prefix + mail.getTo().get(i).getMail());
+      prefix = ", ";
     }
     writer.write("\r\n");
     writer.flush();
 
     writer.write(mail.getBody().getContent());
-    writer.write("\r\n");
-    writer.write(".\r\n");
+    writer.write("\r\n"+"."+"\r\n");
     writer.flush();
 
     line = reader.readLine();

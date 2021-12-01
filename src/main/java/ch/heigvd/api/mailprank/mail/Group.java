@@ -20,7 +20,7 @@ public class Group {
   public Group(List<Person> members) {
     this.members = new ArrayList<>();
     for (Person p : members) {
-      this.members.add(p.clone());
+      this.members.add(p);
     }
   }
 
@@ -34,12 +34,12 @@ public class Group {
   }
 
   /**
-   * Get the victims of the prank, which are the Persons in the list of member from index 1 to n-1
+   * Get the victims of the prank, which are the Persons in the list of member from index 1 to n - 1
    * where n is the number of members
    *
    * @return the list of victims
    */
   public List<Person> getVictims() {
-    return members.subList(1, members.size() - 1);
+    return members.subList(1, members.size());
   }
 }
