@@ -1,18 +1,28 @@
 package ch.heigvd.api.mailprank.mail;
 
+/**
+ * Class representing a Person in the context of the prank
+ *
+ * @author Maëlle Vogel, Mélissa Gehring
+ */
 public class Person {
-    private final String mail;
+  private final String mail;
 
-    public Person(String mail){
-        this.mail = mail;
-    }
+  /**
+   * Constructor
+   *
+   * @param mail the email address of the Person
+   */
+  public Person(String mail) {
+    this.mail = mail;
+  }
 
-    public String getMail() {
-        return mail;
-    }
-
-    @Override
-    public Person clone(){
-        return new Person(mail);
-    }
+  /**
+   * Getter
+   *
+   * @return the email address of the Person
+   */
+  public String getMail() {
+    return mail;
+  }
 }

@@ -13,18 +13,33 @@ import java.util.List;
 
 import static java.util.Collections.shuffle;
 
+/**
+ * Class used to get the messages and the email addresses from configuration files to set up the
+ * victims and content for the prank
+ *
+ * @author Maëlle Vogel, Mélissa Gehring
+ */
 public class ConfigurationManager {
-
+  // Make ConfigurationManager uninstanciable
   private ConfigurationManager() {}
 
+  /**
+   * Create nbGroups from the list of email addresses stored in victims.utf8
+   *
+   * @param nbGroups the number of groups to create
+   * @return the list of Group created
+   * @throws RuntimeException if the number of group doesn't divide the number of victims
+   */
   public static List<Group> configureGroups(int nbGroups) {
     List<Person> victims = extractVictimsFromFile();
     if (victims.size() % nbGroups != 0) {
       throw new RuntimeException("Number of groups should divide the number of victims.");
     }
 
-    shuffle(victims); // randomize the order of the victims to form the groups randomly
+    // Randomize the order of the victims to form the groups randomly
+    shuffle(victims);
 
+    // Divide the victims into nbGroups sublists
     List<Group> groups = new ArrayList<>();
     int nbVictimsPerGroup = victims.size() / nbGroups;
     for (int i = 0; i < nbGroups; i++) {
@@ -36,30 +51,14 @@ public class ConfigurationManager {
     return groups;
   }
 
-  private static List<Person> extractVictimsFromFile() {
-    ArrayList<Person> victimsList = new ArrayList<>();
-
-    BufferedReader reader;
-
-    try {
-      reader =
-          new BufferedReader(
-              new InputStreamReader(
-                  new FileInputStream("config/victims.utf8"), StandardCharsets.UTF_8));
-      String nextMail;
-      while ((nextMail = reader.readLine()) != null) {
-        victimsList.add(new Person(nextMail));
-      }
-    } catch (Exception e) {
-      throw new RuntimeException("Exception when reading victims.utf8.");
-    }
-
-    return victimsList;
-  }
-
+  /**
+   * Get the list of Content from the content.utf8 configuration file
+   *
+   * @return the list of Content read from file
+   * @throws RuntimeException in case of error while reading the file
+   */
   public static List<Content> configureContents() {
     ArrayList<Content> contentList = new ArrayList<>();
-
     BufferedReader reader;
 
     try {
@@ -79,22 +78,52 @@ public class ConfigurationManager {
     return contentList;
   }
 
+  /*
+   * Reads the victims.utf8 configuration file to create a list
+   * with all the potential victims and senders
+   */
+  private static List<Person> extractVictimsFromFile() {
+    ArrayList<Person> victimsList = new ArrayList<>();
+    BufferedReader reader;
+
+    try {
+      reader =
+          new BufferedReader(
+              new InputStreamReader(
+                  new FileInputStream("config/victims.utf8"), StandardCharsets.UTF_8));
+      String nextMail;
+      while ((nextMail = reader.readLine()) != null) {
+        // Each non-empty line is a new email address
+        victimsList.add(new Person(nextMail));
+      }
+    } catch (Exception e) {
+      throw new RuntimeException("Exception when reading victims.utf8.");
+    }
+
+    return victimsList;
+  }
+
+  /*
+   * Read the next Content from the content.utf8 file
+   */
   private static Content readSingleContent(BufferedReader reader) {
     String subject;
     StringBuilder body = new StringBuilder();
     String line;
     try {
       line = reader.readLine();
-      if (line == null) {
+      if (line == null) { // We reached the end of the file
         return null;
       } else if (line.startsWith("Subject:")) {
         subject = line + "\n";
         String prefix = "";
+        // The content ends with ** or with null if we reached the end of the file
         while ((line = reader.readLine()) != null && !line.contains("**")) {
+          // Aggregate the body of the message
           body.append(prefix).append(line);
           prefix = "\n";
         }
-      } else {
+      } else { // Content needs to start with Subject:
         throw new RuntimeException("Illegal content.utf8 format.");
       }
     } catch (Exception e) {
