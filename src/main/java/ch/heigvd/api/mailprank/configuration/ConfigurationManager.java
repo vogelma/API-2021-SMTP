@@ -15,37 +15,37 @@ import static java.util.Collections.shuffle;
 
 public class ConfigurationManager {
 
-  private ConfigurationManager() {
-  }
+  private ConfigurationManager() {}
 
   public static List<Group> configureGroups(int nbGroups) {
     List<Person> victims = extractVictimsFromFile();
-    if(victims.size() % nbGroups != 0) {
+    if (victims.size() % nbGroups != 0) {
       throw new RuntimeException("Number of groups should divide the number of victims.");
     }
 
     shuffle(victims); // randomize the order of the victims to form the groups randomly
 
     List<Group> groups = new ArrayList<>();
-    int nbVictimsPerGroup = victims.size()/nbGroups;
-    for(int i = 0; i < nbGroups; i++){
-      List<Person> groupVictims = victims.subList(i*nbVictimsPerGroup, (i+1)*nbVictimsPerGroup);
+    int nbVictimsPerGroup = victims.size() / nbGroups;
+    for (int i = 0; i < nbGroups; i++) {
+      List<Person> groupVictims =
+          victims.subList(i * nbVictimsPerGroup, (i + 1) * nbVictimsPerGroup);
       groups.add(new Group(groupVictims));
     }
 
     return groups;
   }
 
-  private static List<Person> extractVictimsFromFile(){
+  private static List<Person> extractVictimsFromFile() {
     ArrayList<Person> victimsList = new ArrayList<>();
 
     BufferedReader reader;
 
     try {
       reader =
-              new BufferedReader(
-                      new InputStreamReader(
-                              new FileInputStream("config/victims.utf8"), StandardCharsets.UTF_8));
+          new BufferedReader(
+              new InputStreamReader(
+                  new FileInputStream("config/victims.utf8"), StandardCharsets.UTF_8));
       String nextMail = "";
       while ((nextMail = reader.readLine()) != null) {
         victimsList.add(new Person(nextMail));
@@ -67,40 +67,39 @@ public class ConfigurationManager {
           new BufferedReader(
               new InputStreamReader(
                   new FileInputStream("config/content.utf8"), StandardCharsets.UTF_8));
-      while (reader.readLine() != null) {
-        contentList.add(readSingleContent(reader));
-      }
+      Content currentReadContent = null;
+      do {
+        if ((currentReadContent = readSingleContent(reader)) != null) {
+          contentList.add(currentReadContent);
+        }
+      } while (currentReadContent != null);
     } catch (Exception e) {
       throw new RuntimeException("Exception when reading content.utf8.");
     }
-
-    for(Content c : contentList){
-      System.out.println(c.getContent());
-      System.out.println("*");
-    }
-
     return contentList;
   }
 
   private static Content readSingleContent(BufferedReader reader) {
     String subject = "";
-    String body = "";
+    StringBuilder body = new StringBuilder();
+    String line;
     try {
-      String line = reader.readLine();
-      if (line.startsWith("Subject:")) {
-        String[] parsedLine = line.split(": ");
-        subject = line;
+      line = reader.readLine();
+      if (line == null) {
+        return null;
+      } else if (line.startsWith("Subject:")) {
+        subject = line + "\n";
+        String prefix = "";
+        while ((line = reader.readLine()) != null && !line.contains("**")) {
+          body.append(prefix).append(line);
+          prefix = "\n";
+        }
       } else {
-        System.out.println("Problem !");
+        throw new RuntimeException("Illegal content.utf8 format.");
       }
-      reader.readLine(); // empty line
-      while (!(line = reader.readLine()).contains("**")) {
-        body += line;
-        body += "\n";
-      }
-
     } catch (Exception e) {
+      throw new RuntimeException("Exception when reading content.utf8.");
     }
-    return new Content(subject+"\n"+body);
+    return new Content(subject + body);
   }
 }
