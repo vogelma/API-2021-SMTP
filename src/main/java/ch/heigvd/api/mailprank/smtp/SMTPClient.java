@@ -16,27 +16,18 @@ import java.util.logging.Logger;
  */
 public class SMTPClient {
   static final Logger LOG = Logger.getLogger(SMTPClient.class.getName());
+  private static final String SERVER_ADDRESS = "localhost";
+  private static final int SERVER_PORT = 25;
 
-  private final String serverAddress;
-  private final int serverPort;
-
-  /**
-   * Constructor
-   *
-   * @param serverAddr SMTP server address
-   * @param serverPort SMTP server port
-   */
-  public SMTPClient(String serverAddr, int serverPort) {
-    this.serverAddress = serverAddr;
-    this.serverPort = serverPort;
-  }
+  // Make SMTPClient uninstanciable
+  private SMTPClient() {}
 
   /**
    * Send the email address
    *
    * @param mail email which contains sender, receiver and body
    */
-  public void sendMail(Mail mail) {
+  public static void sendMail(Mail mail) {
     System.out.println("Sending message with SMTP");
 
     Socket socketServer = null;
@@ -44,7 +35,7 @@ public class SMTPClient {
     BufferedReader reader = null;
 
     try {
-      socketServer = new Socket(serverAddress, serverPort);
+      socketServer = new Socket(SERVER_ADDRESS, SERVER_PORT);
       writer =
           new PrintWriter(
               new OutputStreamWriter(socketServer.getOutputStream(), StandardCharsets.UTF_8), true);
@@ -128,7 +119,7 @@ public class SMTPClient {
   /*
    * Send the sequence toSend + param
    */
-  private void sendSequence(
+  private static void sendSequence(
       String toSend, String param, PrintWriter writer, BufferedReader reader) {
     writer.write(toSend);
     writer.write(param);

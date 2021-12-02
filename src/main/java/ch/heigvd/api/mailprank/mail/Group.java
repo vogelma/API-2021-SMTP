@@ -19,9 +19,7 @@ public class Group {
    */
   public Group(List<Person> members) {
     this.members = new ArrayList<>();
-    for (Person p : members) {
-      this.members.add(p);
-    }
+    this.members.addAll(members);
   }
 
   /**

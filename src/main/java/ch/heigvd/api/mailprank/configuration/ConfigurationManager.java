@@ -10,6 +10,8 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static java.util.Collections.shuffle;
 
@@ -20,6 +22,8 @@ import static java.util.Collections.shuffle;
  * @author Maëlle Vogel, Mélissa Gehring
  */
 public class ConfigurationManager {
+  static final Logger LOG = Logger.getLogger(ConfigurationManager.class.getName());
+
   // Make ConfigurationManager uninstanciable
   private ConfigurationManager() {}
 
@@ -32,7 +36,10 @@ public class ConfigurationManager {
    *     number of person in a group is smaller than 3
    */
   public static List<Group> configureGroups(int nbGroups) {
+    // Get all victims from the file
     List<Person> victims = extractVictimsFromFile();
+
+    // Check that the number of groups fit with the number of victims
     if (victims.size() % nbGroups != 0) {
       throw new RuntimeException("Number of groups should divide the number of victims.");
     }
@@ -59,7 +66,6 @@ public class ConfigurationManager {
    * Get the list of Content from the content.utf8 configuration file
    *
    * @return the list of Content read from file
-   * @throws RuntimeException in case of error while reading the file
    */
   public static List<Content> configureContents() {
     ArrayList<Content> contentList = new ArrayList<>();
@@ -71,13 +77,13 @@ public class ConfigurationManager {
               new InputStreamReader(
                   new FileInputStream("config/content.utf8"), StandardCharsets.UTF_8));
       Content currentReadContent;
-      do {
+      do { // Read and store the next mail content
         if ((currentReadContent = readSingleContent(reader)) != null) {
           contentList.add(currentReadContent);
         }
       } while (currentReadContent != null);
     } catch (Exception e) {
-      throw new RuntimeException("Exception when reading content.utf8.");
+      LOG.log(Level.SEVERE, e.getMessage(), e);
     }
     return contentList;
   }
@@ -101,7 +107,7 @@ public class ConfigurationManager {
         victimsList.add(new Person(nextMail));
       }
     } catch (Exception e) {
-      throw new RuntimeException("Exception when reading victims.utf8.");
+      LOG.log(Level.SEVERE, e.getMessage(), e);
     }
 
     return victimsList;
@@ -111,7 +117,7 @@ public class ConfigurationManager {
    * Read the next Content from the content.utf8 file
    */
   private static Content readSingleContent(BufferedReader reader) {
-    String subject;
+    String subject = null;
     StringBuilder body = new StringBuilder();
     String line;
     try {
@@ -131,7 +137,7 @@ public class ConfigurationManager {
         throw new RuntimeException("Illegal content.utf8 format.");
       }
     } catch (Exception e) {
-      throw new RuntimeException("Exception when reading content.utf8.");
+      LOG.log(Level.SEVERE, e.getMessage(), e);
     }
     return new Content(subject + body);
   }

@@ -14,9 +14,6 @@ import java.util.Random;
  * @author Maëlle Vogel, Mélissa Gehring
  */
 public class PrankGenerator {
-  private static final String SERVER_ADDRESS = "localhost";
-  private static final int SERVER_PORT = 25;
-
   // Make PrankGenerator uninstanciable
   private PrankGenerator() {}
 
@@ -27,12 +24,12 @@ public class PrankGenerator {
    * @param content the list of Content we can pick the message from
    * @throws IOException if a prank couldn't be sent
    */
-  public static void generate(List<Group> groups, List<Content> content) {
+  public static void generatePranks(List<Group> groups, List<Content> content) {
     Random rng = new Random();
     for (Group group : groups) {
       int nextContentIdx = rng.nextInt(content.size());
       Mail mail = new Mail(content.get(nextContentIdx), group.getSender(), group.getVictims());
-      Prank prank = new Prank(mail, SERVER_ADDRESS, SERVER_PORT);
+      Prank prank = new Prank(mail);
       prank.sendPrank();
     }
   }
