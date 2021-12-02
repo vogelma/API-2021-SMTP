@@ -27,7 +27,7 @@ public class PrankGenerator {
    * @param content the list of Content we can pick the message from
    * @throws IOException if a prank couldn't be sent
    */
-  public static void generate(List<Group> groups, List<Content> content) throws IOException {
+  public static void generate(List<Group> groups, List<Content> content) {
     Random rng = new Random();
     for (Group group : groups) {
       int nextContentIdx = rng.nextInt(content.size());

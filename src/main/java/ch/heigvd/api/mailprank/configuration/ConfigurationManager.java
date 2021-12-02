@@ -28,12 +28,17 @@ public class ConfigurationManager {
    *
    * @param nbGroups the number of groups to create
    * @return the list of Group created
-   * @throws RuntimeException if the number of group doesn't divide the number of victims
+   * @throws RuntimeException if the number of group doesn't divide the number of victims or if the
+   *     number of person in a group is smaller than 3
    */
   public static List<Group> configureGroups(int nbGroups) {
     List<Person> victims = extractVictimsFromFile();
     if (victims.size() % nbGroups != 0) {
       throw new RuntimeException("Number of groups should divide the number of victims.");
+    }
+    int nbVictimsPerGroup = victims.size() / nbGroups;
+    if (nbVictimsPerGroup < 3) {
+      throw new RuntimeException("There should be at least 3 persons per group.");
     }
 
     // Randomize the order of the victims to form the groups randomly
@@ -41,7 +46,6 @@ public class ConfigurationManager {
 
     // Divide the victims into nbGroups sublists
     List<Group> groups = new ArrayList<>();
-    int nbVictimsPerGroup = victims.size() / nbGroups;
     for (int i = 0; i < nbGroups; i++) {
       List<Person> groupVictims =
           victims.subList(i * nbVictimsPerGroup, (i + 1) * nbVictimsPerGroup);

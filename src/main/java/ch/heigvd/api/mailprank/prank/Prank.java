@@ -3,8 +3,6 @@ package ch.heigvd.api.mailprank.prank;
 import ch.heigvd.api.mailprank.mail.Mail;
 import ch.heigvd.api.mailprank.smtp.SMTPClient;
 
-import java.io.IOException;
-
 /**
  * Class representing a prank played on a single group
  *
@@ -28,14 +26,10 @@ public class Prank {
     this.serverPort = serverPort;
   }
 
-  /**
-   * Send the prank email
-   *
-   * @throws IOException if the email couldn't be sent
-   */
-  public void sendPrank() throws IOException {
+  /** Send the prank email */
+  public void sendPrank() {
     SMTPClient client = new SMTPClient(serverAddr, serverPort);
     client.sendMail(mail);
-    System.out.println("Mail send");
+    System.out.println("Mail sent");
   }
 }
