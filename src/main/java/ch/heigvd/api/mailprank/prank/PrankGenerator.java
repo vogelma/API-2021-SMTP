@@ -22,7 +22,6 @@ public class PrankGenerator {
    *
    * @param groups the list of groups on which we have to play the pranks
    * @param content the list of Content we can pick the message from
-   * @throws IOException if a prank couldn't be sent
    */
   public static void generatePranks(List<Group> groups, List<Content> content) {
     Random rng = new Random();

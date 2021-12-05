@@ -1,63 +1,110 @@
-# API-2021-SMTP
+# Labo SMTP - Mélissa Gehring et Maëlle Vogel
 
-⚠️ Please clone [our own fork of MockMock server](https://github.com/HEIGVD-Course-API/MockMock) instead of the official one, because we resolved an issues with a dependency (see this [pull request](https://github.com/tweakers/MockMock/pull/8) if you want to have more information).
+## Introduction, ce qu'il faut savoir
 
-## Objectives
+Notre projet permet de créer des pranks. Un prank consiste à envoyer un mail forgé à une liste de victimes. L'expéditeur et les récepteurs sont
+choisi de façon aléatoire parmi une liste prédéfinie par nos soins. Un mail est dit forgé quand il usurpre l'identité
+d'un tiers et contient de fausses informations, souvent dans un but malveillant.
 
-In this lab, you will develop a client application (TCP) in Java. This client application will use the Socket API to communicate with an SMTP server. The code that you write will include a **partial implementation of the SMTP protocol**. These are the objectives of the lab:
+## MockMock avec docker
 
-* Make practical experiments to become familiar with the **SMTP protocol**. After the lab, you should be able to use a command line tool to **communicate with an SMTP server**. You should be able to send well-formed messages to the server, in order to send emails to the address of your choice.
+Nous avons choisi de suivre les recommandations et d'utiliser MockMock plutôt qu'un autre programme au fonctionnement similaire.
+Nous avons ensuite placé l'application MockMock dans un container Docker. Pour que MockMock puisse fonctionner dans un container il faut créer 
+un Dockerfile à la racine du dossier. Dans ce Dockerfile nous devons donner les informations nécessaires pour lancer l'exécutif jar.
 
-* Understand the notions of **test double** and **mock server**, which are useful when developing and testing a client-server application. During the lab, you will setup and use such a **mock server**.
-
-* Understand what it means to **implement the SMTP protocol** and be able to send e-mail messages, by working directly on top of the Socket API (i.e. you are not allowed to use a SMTP library).
-
-* **See how easy it is to send forged e-mails**, which appear to be sent by certain people but in reality are issued by malicious users.
-
-* **Design a simple object-oriented model** to implement the functional requirements described in the next paragraph.
-
-
-## Functional requirements
-
-Your mission is to develop a client application that automatically plays pranks on a list of victims:
-
-* The user should be able to **define a list of victims** (concretely, you should be able to create a file containing a list of e-mail addresses).
-* The user should be able to **define how many groups of victims should be formed** in a given campaign. In every group of victims, there should be 1 sender and at least 2 recipients (i.e. the minimum size for a group is 3).
-* The user should be able to **define a list of e-mail messages**. When a prank is played on a group of victims, then one of these messages should be selected. **The mail should be sent to all group recipients, from the address of the group sender**. In other words, the recipient victims should be lead to believe that the sender victim has sent them.
-
-## Constraints
-
-- The goal is for you to work at the wire protocol level (with the Socket API). Therefore, you CANNOT use a library that takes care of the protocol details. You have to work with the input and output streams.
-- The program must be configurable: the addresses, groups, messages CANNOT be hard-coded in the program and MUST be managed in config files.
+    FROM openjdk:11
+    COPY target/MockMock-1.4.0.one-jar.jar /mock.jar
+    WORKDIR /
+    CMD ["java", "-jar", "/mock.jar"]
 
 
-## Example
+Ensuite il faut construire l'image avec ``docker build -t mockmock .`` pour cela il faut se trouver à la racine du dossier
+où se trouve le fichier Dockerfile.
+Après cela on peut lancer MockMock, mais il faut mapper les ports pour pouvoir utiliser l'interface web comme il se doit:
 
-Consider that your program generates a group G1. The group sender is Bob. The group recipients are Alice, Claire and Peter. When the prank is played on group G1, then your program should pick one of the fake messages. It should communicate with an SMTP server, so that Alice, Claire and Peter receive an e-mail, which appears to be sent by Bob.
+``docker run -d -p 8282:8282 -p 2525:25 mockmock``
 
-## Teams
+Le port 25 ne sera pas utilisé car cela causait trop de problèmes (sur Debian 11).
+Maintenant en allant sur [http://localhost:8282/](http://localhost:8282/) on a accès au serveur SMTP de MockMock.
+Finalement, en lançant notre application réalisée pour le projet, on voit que les mails arrivent bien sur MockMock.
 
-You may work in teams of 2 students.
+### Note
 
-## Deliverables
+Sur Debian 11, docker prend presque 2 minutes à démarrer. Ce qui peut créer une erreur si on lance l'application prank trop tôt.
 
-You will deliver the results of your lab in a GitHub repository. You do not have to fork a specific repo, you can create one from scratch.
+###Fonctionnement de MockMock
 
-Your repository should contain both the source code of your Java project and your report. Your report should be a single `README.md` file, located at the root of your repository. The images should be placed in a `figures` directory.
+MockMock nous permet de tester nos pranks dans des conditions quasi réelles, sans pour autant que les emails soient rééellement
+envoyés. Nous évitons ainsi de saturer les serveurs SMTP de la HEIG-VD ou de toute autre structure, mais pouvons tout de même 
+tester le fonctionnement de notre programme. MockMock agit comme un serveur SMTP à qui on peut envoyer des requêtes, et qui
+y répond, sans pour autant qu'il envoie les mails. Il se contente de simuler un échange rééel, et affiche ensuite les mails 
+envoyés.
 
-Your report MUST include the following sections:
 
-* **A brief description of your project**: if people exploring GitHub find your repo, without a prior knowledge of the API course, they should be able to understand what your repo is all about and whether they should look at it more closely.
+## Utilisation de notre application prank-SMTP
 
-* **Instructions for setting up a mock SMTP server (with Docker - which you will learn all about in the next 2 weeks)**. The user who wants to experiment with your tool but does not really want to send pranks immediately should be able to use a mock SMTP server. For people who are not familiar with this concept, explain it to them in simple terms. Explain which mock server you have used and how you have set it up.
+Quelques manipulations sont nécessaires au bon fonctionnement de notre application. En plus de lancer le container docker contenant MockMock,
+il faut également fournir la liste des mails des victimes ciblées, et la liste des différents contenus de mails parmi lesquels on peut choisir.
 
-* **Clear and simple instructions for configuring your tool and running a prank campaign**. If you do a good job, an external user should be able to clone your repo, edit a couple of files and send a batch of e-mails in less than 10 minutes.
+Les victimes sont listées dans le fichier *victims.utf8* dans le dossier *config* à la racine. Il faut mettre une adresse mail par ligne.
 
-* **A description of your implementation**: document the key aspects of your code. It is probably a good idea to start with a class diagram. Decide which classes you want to show (focus on the important ones) and describe their responsibilities in text. It is also certainly a good idea to include examples of dialogues between your client and an SMTP server (maybe you also want to include some screenshots here).
+La liste des contenus à envoyer dans les mails forgés se trouve dans le même dossier, dans le fichier *content.utf8*. Chaque contenu doit commencer par 
+*Subject:* suivi de l'objet du mail, de deux retours à la ligne, et doit finalement contenir le corps du message.
+Chaque contenu est séparé par la chaîne de charactères  **.
 
-## References
+Une fois ces deux fichiers remplis, il faut lancer main.java avec un unique argument, un entier qui donne le nombre de groupes à créer. Notre programme s'occupera ensuite
+de séparer les victimes en groupes, et d'envoyer un mail par groupe, choisissant un envoyeur parmi les membres du groupe, et un contenu aléatoirement parmi les différents contenus
+précisés dans *content.utf8*. 
 
-* [Here is our fork of MockMock server](https://github.com/HEIGVD-Course-API/MockMock), in which we resolved an issues with a dependency (see this [pull request](https://github.com/tweakers/MockMock/pull/8) if you want to have more information).
-* The [mailtrap](<https://mailtrap.io/>) online service for testing SMTP
-* The [SMTP RFC](<https://tools.ietf.org/html/rfc5321#appendix-D>), and in particular the [example scenario](<https://tools.ietf.org/html/rfc5321#appendix-D>)
-* Testing SMTP with TLS: `openssl s_client -connect smtp.mailtrap.io:2525 -starttls smtp -crlf`
+La valeur entière fournie en argument de notre programme doit être compatible avec le nombre de victimes listées dans le fichier *victims.utf8*, 
+dans le sens où il faut un minimum de 3 victimes par groupe,
+et le nombre de victimes doit être divisable par le nombre de groupes souhaité.
+Les victimes seront alors distribuées aléatoirement en *n* groupes, *n* la valeur passée en argument.
+Chaque groupe sera composé d'un envoyeur, choisi aléatoirement, et tous les autres membres du groupe seront donc les receveurs.
+Notre application s'occupera ensuite de créer *n* mails, un par groupe, et de leur donner le bon format afin qu'il paraisse que l'envoyeur ait envoyé
+aux receveurs le contenu choisi parmi la liste des contenus dans *contents.utf8*.
+
+## Fonctionnement de notre application
+
+Nous avons séparé notre application en 4 parties distinctes. 
+
+### Configuration, dans le package *configuration* 
+
+Cette partie concerne le traitement des fichiers *victims.utf8*
+et *content.utf8*. La classe *ConfigurationManager.java*, une classe non instanciable, contient entre autres les deux 
+méthodes publiques et statiques *configureGroups* et *configureContents*. Ces méthodes sont appelées par la méthode *main* et permettent d'initialiser les différentes entités
+*Person*, *Group* et *Content* décrites plus bas.
+
+### Mail, dans le package *mail*
+
+Cette partie concerne le concept de mail, comme son nom l'indique. L'entité *Person* représente une personne, qui peut être envoyeuse ou receveuse. Une 
+personne correspond à une ligne dans le fichier *victims.utf8*, et elle contient simplement l'adresse mail associée à cette personne.
+
+L'entité *Group* correspond à une liste de *Person*. La première personne dans la liste est choisie par défaut comme étant l'envoyeur, et le reste des membres
+sont les receveurs. Une liste de *n* groupes est créé en fonction du nombre passé en argument du programme, répartissant toutes les personnes équitablement dans chaque groupe.
+
+L'entité *Content* correspond simplement à l'objet et au corps du mail. Il s'agit simplement de la chaine de caractère à envoyer dans un mail. Une liste de contenu est créée
+au moment de la configuration, à partir du fichier *content.utf8*.
+
+L'entité *Mail* correspond à un mail. Chaque groupe est associé à un mail, celui-ci possédant un envoyeur et une liste de receveurs correspondants au groupe associé. 
+Un mail possède également un contenu.
+
+### Prank, dans le package *prank*
+
+Cette partie concerne la mise en place des différents pranks.
+Un *Prank* est créé pour chaque groupe, et représente l'envoi du mail associé au groupe en question. 
+La méthode *sendPrank* permet tout simplement d'envoyer le mail via un client SMTP décrit plus bas.
+
+L'entité *PrankGenerator*, non instanciable, possède une unique méthode statique *generatePranks* qui permet de créer, à partir
+d'une liste de groupes et d'une liste de contenus, le mail correspondant au groupe, avec un contenu choisi aléatoirement parmi la liste,
+puis de créer le prank associé au mail. Finalement,
+*PrankGenerator* s'assure que les pranks soient joués (aka que les mails soient envoyés).
+
+### SMTPClient, dans le package *smtp*
+
+Cette partie concerne la connexion et la communication avec le serveur SMTP de MockMock.
+La classe *SMTPClient* est également non instanciable et possède une méthode statique *sendMail* qui permet simplement d'initier une connexion, 
+puis d'envoyer un mail en suivant le protocole SMTP.
+
+Voilà un exemple type de communication entre notre application et le serveur SMTP de MockMock:
+_TODO insérer un scénario test_.
