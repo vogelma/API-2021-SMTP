@@ -107,4 +107,25 @@ La classe *SMTPClient* est également non instanciable et possède une méthode 
 puis d'envoyer un mail en suivant le protocole SMTP.
 
 Voilà un exemple type de communication entre notre application et le serveur SMTP de MockMock:
-_TODO insérer un scénario test_.
+C pour les requêtes de notre application, le client, et S pour les réponses du serveur MockMock.
+
+* C: EHLO localhost
+* S: 220 LAPTOP-ALD4NRGI ESMTP MockMock SMTP Server version 1.4
+* S: 250-LAPTOP-ALD4NRGI
+* S: 250-8BITMIME
+* S: 250 Ok
+* C: MAIL FROM: mail@sender.com
+* S: 250 Ok
+* C: RCPT TO: mail@receiver1.com
+* S: 250 Ok
+* C: RCPT TO: mail@receiver2.com
+* S: 250 Ok
+* C: DATA
+* S: 354 End data with \<CR>\<LF>.\<CR>\<LF>
+* C: Content-Type: text/plain: charset="utf-8"<br/>
+    From: mail@sender.com<br/>
+    To: mail@receiver1.com, mail@receiver2.com<br/>
+Subject: Objet du mail<br/><br/>
+    Corps du mail<br/>
+    .
+* S: 250 Ok

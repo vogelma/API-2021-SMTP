@@ -17,7 +17,7 @@ import java.util.logging.Logger;
 public class SMTPClient {
   static final Logger LOG = Logger.getLogger(SMTPClient.class.getName());
   private static final String SERVER_ADDRESS = "localhost";
-  private static final int SERVER_PORT = 2525;
+  private static final int SERVER_PORT = 25;
 
   // Make SMTPClient uninstanciable
   private SMTPClient() {}
