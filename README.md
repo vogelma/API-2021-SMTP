@@ -3,7 +3,7 @@
 ## Introduction, ce qu'il faut savoir
 
 Notre projet permet de créer des pranks. Un prank consiste à envoyer un mail forgé à une liste de victimes. L'expéditeur et les récepteurs sont
-choisi de façon aléatoire parmi une liste prédéfinie par nos soins. Un mail est dit forgé quand il usurpre l'identité
+choisi de façon aléatoire parmi une liste prédéfinie par l'utilisateur de l'application. Un mail est dit forgé quand il usurpre l'identité
 d'un tiers et contient de fausses informations, souvent dans un but malveillant.
 
 ## MockMock avec docker
