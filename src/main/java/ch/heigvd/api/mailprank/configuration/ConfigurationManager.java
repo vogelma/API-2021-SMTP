@@ -24,6 +24,9 @@ import static java.util.Collections.shuffle;
 public class ConfigurationManager {
   static final Logger LOG = Logger.getLogger(ConfigurationManager.class.getName());
 
+  private static final String CONTENT_FILE_PATH = "config/content.utf8";
+  private static final String VICTIMS_FILE_PATH = "config/victims.utf8";
+
   // Make ConfigurationManager uninstanciable
   private ConfigurationManager() {}
 
@@ -75,7 +78,7 @@ public class ConfigurationManager {
       reader =
           new BufferedReader(
               new InputStreamReader(
-                  new FileInputStream("config/content.utf8"), StandardCharsets.UTF_8));
+                  new FileInputStream(CONTENT_FILE_PATH), StandardCharsets.UTF_8));
       Content currentReadContent;
       do { // Read and store the next mail content
         if ((currentReadContent = readSingleContent(reader)) != null) {
@@ -89,7 +92,7 @@ public class ConfigurationManager {
   }
 
   /*
-   * Reads the victims.utf8 configuration file to create a list
+   * Read the victims.utf8 configuration file to create a list
    * with all the potential victims and senders
    */
   private static List<Person> extractVictimsFromFile() {
@@ -100,7 +103,7 @@ public class ConfigurationManager {
       reader =
           new BufferedReader(
               new InputStreamReader(
-                  new FileInputStream("config/victims.utf8"), StandardCharsets.UTF_8));
+                  new FileInputStream(VICTIMS_FILE_PATH), StandardCharsets.UTF_8));
       String nextMail;
       while ((nextMail = reader.readLine()) != null) {
         // Each non-empty line is a new email address
@@ -139,6 +142,7 @@ public class ConfigurationManager {
     } catch (Exception e) {
       LOG.log(Level.SEVERE, e.getMessage(), e);
     }
+
     return new Content(subject + body);
   }
 }

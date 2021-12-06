@@ -6,6 +6,7 @@ import ch.heigvd.api.mailprank.mail.Person;
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -16,8 +17,10 @@ import java.util.logging.Logger;
  */
 public class SMTPClient {
   static final Logger LOG = Logger.getLogger(SMTPClient.class.getName());
+
   private static final String SERVER_ADDRESS = "localhost";
-  private static final int SERVER_PORT = 2525;
+  private static final int SERVER_PORT = 25;
+  private static final String CR_LF = "\r\n";
 
   // Make SMTPClient uninstanciable
   private SMTPClient() {}
@@ -25,10 +28,10 @@ public class SMTPClient {
   /**
    * Send the email address
    *
-   * @param mail email which contains sender, receiver and body
+   * @param pranks list of emails which contains sender, receiver and body
    */
-  public static void sendMail(Mail mail) {
-    System.out.println("Sending message with SMTP");
+  public static void sendPranks(List<Mail> pranks) {
+    System.out.println("Sending messages with SMTP");
 
     Socket socketServer = null;
     PrintWriter writer = null;
@@ -43,10 +46,11 @@ public class SMTPClient {
           new BufferedReader(
               new InputStreamReader(socketServer.getInputStream(), StandardCharsets.UTF_8));
 
+      /* CONNEXION */
       String line = reader.readLine();
       System.out.println(line);
       // Must be the domain
-      writer.write("EHLO localhost\r\n");
+      writer.write("EHLO localhost" + CR_LF);
       writer.flush();
 
       // Check error
@@ -58,38 +62,13 @@ public class SMTPClient {
         }
       }
 
-      sendSequence("MAIL FROM: ", mail.getFrom().getMail(), writer, reader);
-
-      for (Person receiver : mail.getTo()) {
-        sendSequence("RCPT TO: ", receiver.getMail(), writer, reader);
+      /* SEND MAILS */
+      for (Mail mail : pranks) {
+        sendMail(mail, writer, reader);
       }
 
-      writer.write("DATA\r\n");
-      writer.flush();
-
-      line = reader.readLine();
-      System.out.println(line);
-
-      writer.write("Content-Type: text/plain: charset=\"utf-8\"\r\n");
-      writer.write("From: " + mail.getFrom().getMail() + "\r\n");
-
-      writer.write("To: ");
-      String prefix = "";
-      for (int i = 0; i < mail.getTo().size(); ++i) {
-        writer.write(prefix + mail.getTo().get(i).getMail());
-        prefix = ", ";
-      }
-      writer.write("\r\n");
-      writer.flush();
-
-      writer.write(mail.getBody().getContent());
-      writer.write("\r\n" + "." + "\r\n");
-      writer.flush();
-
-      line = reader.readLine();
-      System.out.println(line);
-
-      writer.write("QUIT\r\n");
+      /* QUIT */
+      writer.write("QUIT" + CR_LF);
       writer.flush();
     } catch (Exception e) {
       LOG.log(Level.SEVERE, e.getMessage(), e);
@@ -117,19 +96,61 @@ public class SMTPClient {
   }
 
   /*
+   * Send the mail
+   */
+  private static void sendMail(Mail mail, PrintWriter writer, BufferedReader reader)
+      throws IOException {
+    sendSequence("MAIL FROM: ", mail.getFrom().getMail(), writer, reader);
+
+    for (Person receiver : mail.getTo()) {
+      sendSequence("RCPT TO: ", receiver.getMail(), writer, reader);
+    }
+
+    sendData(mail, writer, reader);
+  }
+
+  /*
    * Send the sequence toSend + param
    */
   private static void sendSequence(
-      String toSend, String param, PrintWriter writer, BufferedReader reader) {
-    writer.write(toSend);
-    writer.write(param);
-    writer.write("\r\n");
+      String toSend, String param, PrintWriter writer, BufferedReader reader) throws IOException {
+    writer.write(toSend + param + CR_LF);
     writer.flush();
-    try {
-      String line = reader.readLine();
-      System.out.println(line);
-    } catch (Exception e) {
-      LOG.log(Level.SEVERE, e.getMessage(), e);
+    String line = reader.readLine();
+    System.out.println(line);
+  }
+
+  /*
+   * Send the DATA sequence of the mail
+   */
+  private static void sendData(Mail mail, PrintWriter writer, BufferedReader reader)
+      throws IOException {
+    writer.write("DATA" + CR_LF);
+    writer.flush();
+
+    String line = reader.readLine();
+    System.out.println(line);
+
+    StringBuilder sb = new StringBuilder();
+    sb.append("Content-Type: text/plain: charset=\"utf-8\"")
+        .append(CR_LF)
+        .append("From: ")
+        .append(mail.getFrom().getMail())
+        .append(CR_LF)
+        .append("To: ");
+    String prefix = "";
+    for (int i = 0; i < mail.getTo().size(); ++i) {
+      sb.append(prefix).append(mail.getTo().get(i).getMail());
+      prefix = ", ";
     }
+    sb.append(CR_LF);
+    writer.write(sb.toString());
+    writer.flush();
+
+    writer.write(mail.getBody().getContent() + CR_LF + "." + CR_LF);
+    writer.flush();
+
+    line = reader.readLine();
+    System.out.println(line);
   }
 }
