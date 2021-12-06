@@ -12,8 +12,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static java.util.Collections.shuffle;
+import static java.util.regex.Pattern.compile;
 
 /**
  * Class used to get the messages and the email addresses from configuration files to set up the
@@ -107,6 +110,7 @@ public class ConfigurationManager {
       String nextMail;
       while ((nextMail = reader.readLine()) != null) {
         // Each non-empty line is a new email address
+        checkMailFormat(nextMail);
         victimsList.add(new Person(nextMail));
       }
     } catch (Exception e) {
@@ -145,4 +149,15 @@ public class ConfigurationManager {
 
     return new Content(subject + body);
   }
+
+  /*
+   * Check the format of the mail address
+   */
+   private static void checkMailFormat(String mail) {
+     Pattern pattern = compile("[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}");
+     Matcher mat = pattern.matcher(mail);
+     if(!mat.matches()){
+       throw new RuntimeException("Invalid email format");
+     }
+   }
 }
