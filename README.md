@@ -92,26 +92,22 @@ Un mail possède également un contenu.
 ### Prank, dans le package *prank*
 
 Cette partie concerne la mise en place des différents pranks.
-Un *Prank* est créé pour chaque groupe, et représente l'envoi du mail associé au groupe en question. 
-La méthode *sendPrank* permet tout simplement d'envoyer le mail via un client SMTP décrit plus bas.
-
 L'entité *PrankGenerator*, non instanciable, possède une unique méthode statique *generatePranks* qui permet de créer, à partir
-d'une liste de groupes et d'une liste de contenus, le mail correspondant au groupe, avec un contenu choisi aléatoirement parmi la liste,
-puis de créer le prank associé au mail. Finalement,
-*PrankGenerator* s'assure que les pranks soient joués (aka que les mails soient envoyés).
+d'une liste de groupes et d'une liste de contenus, le mail correspondant au groupe, avec un contenu choisi aléatoirement parmi la liste. Finalement,
+*PrankGenerator* s'assure que les pranks soient joués (aka que les mails soient envoyés via la méthode sendPranks décrite plus bas).
 
 ### SMTPClient, dans le package *smtp*
 
 Cette partie concerne la connexion et la communication avec le serveur SMTP de MockMock.
-La classe *SMTPClient* est également non instanciable et possède une méthode statique *sendMail* qui permet simplement d'initier une connexion, 
-puis d'envoyer un mail en suivant le protocole SMTP.
+La classe *SMTPClient* est également non instanciable et possède une méthode publique statique *sendPranks qui permet simplement d'initier une connexion, 
+puis d'envoyer la liste de mails en suivant le protocole SMTP.
 
 Voilà un exemple type de communication entre notre application et le serveur SMTP de MockMock:
 C pour les requêtes de notre application, le client, et S pour les réponses du serveur MockMock.
 
 * C: EHLO localhost
-* S: 220 LAPTOP-ALD4NRGI ESMTP MockMock SMTP Server version 1.4
-* S: 250-LAPTOP-ALD4NRGI
+* S: 220 COMPUTER ESMTP MockMock SMTP Server version 1.4
+* S: 250-COMPUTER
 * S: 250-8BITMIME
 * S: 250 Ok
 * C: MAIL FROM: mail@sender.com
