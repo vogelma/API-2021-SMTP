@@ -66,6 +66,10 @@ aux receveurs le contenu choisi parmi la liste des contenus dans *contents.utf8*
 
 ## Fonctionnement de notre application
 
+Voilà une vue d'ensemble de nos classes et des méthodes les plus importantes :
+
+![Diagramme de classe](figures/API_SMTP.png)
+
 Nous avons séparé notre application en 4 parties distinctes. 
 
 ### Configuration, dans le package *configuration* 
