@@ -53,14 +53,15 @@ public class SMTPClient {
       writer.write("EHLO localhost" + CR_LF);
       writer.flush();
 
-      // Check error
-      for (int i = 0; i < 3; i++) {
-        line = reader.readLine();
-        System.out.println(line);
-        if (!line.startsWith("250")) {
-          LOG.log(Level.SEVERE, "SMTP error: %s", line);
-        }
+      // Get server informations
+      line = reader.readLine();
+      if (!line.startsWith("250-")) { // First check that there's no error
+        LOG.log(Level.SEVERE, "SMTP error: %s", line);
       }
+
+      do { // Then loop until server is done sending information
+        System.out.println(line);
+      } while ((line = reader.readLine()).startsWith("250-"));
 
       /* SEND MAILS */
       for (Mail mail : pranks) {
